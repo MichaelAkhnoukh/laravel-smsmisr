@@ -1,0 +1,39 @@
+{
+  "name": "caishni/sms-misr",
+  "description": "Laravel package for sms-misr api",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "MichaelAkhnoukh",
+      "email": "eng.michaelakhnoukh@gmail.com"
+    }
+  ],
+  "require-dev": {
+    "orchestra/testbench": "^6.0",
+    "phpunit/phpunit": "^9.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Caishni\\SmsMisr\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Caishni\\SmsMisr\\Tests\\": "tests"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Caishni\\SmsMisr\\SmsMisrServiceProvider"
+      ],
+      "aliases": {
+        "SmsMisr": "Caishni\\SmsMisr\\Facades\\SmsMisr"
+      }
+    }
+  },
+  "require": {
+    "guzzlehttp/guzzle": "^7.2"
+  }
+}
