@@ -2,24 +2,28 @@
 
 namespace Caishni\SmsMisr;
 
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Http;
+use Caishni\SmsMisr\Contracts\SmsMisr as SmsMisrContract;
 
-class SmsMisr
+class SmsMisr implements SmsMisrContract
 {
 
-    /** @var \Illuminate\Http\Client\PendingRequest */
+    /** @var PendingRequest */
     protected $httpClient;
 
-    /** @var array */
-    protected $request;
+    /** @var string */
+    protected $username;
+
+    /** @var string */
+    protected $password;
 
     /** @var string */
     protected $sender;
 
-    /** @var array */
-    protected $phoneNumbers = [];
+    /** @var string */
+    protected $phoneNumbers;
 
     /** @var string */
     protected $message;
@@ -36,69 +40,60 @@ class SmsMisr
         'unicode' => 3
     ];
 
-    public function __construct(array $config)
+    public function __construct(PendingRequest $httpClient)
     {
-        $this->validate($config);
+        $this->validateConfiguration(config('sms-misr'));
 
-        $this->sender = $config['sender'];
+        $this->httpClient = $httpClient;
 
-        $this->request['username'] = $config['username'];
-        $this->request['password'] = $config['password'];
-        $this->request['sender'] = $this->sender;
-
-        $this->httpClient = Http::asForm()->baseUrl($config['endpoint']);
+        $this->httpClient->asForm()->baseUrl(config('sms-misr.endpoint'));
     }
 
     /**
-     * @param string|array $numbers
-     * @return $this
+     * @inheritDoc
      */
-    public function to($numbers): SmsMisr
+    public function to($recipients): SmsMisrContract
     {
-        if (is_array($numbers)) {
-            $this->phoneNumbers = array_merge($this->phoneNumbers, $numbers);
-        } elseif (is_string($numbers)) {
-            $this->phoneNumbers = array_merge($this->phoneNumbers, [$numbers]);
+        if (is_array($recipients)) {
+            $this->phoneNumbers = implode(',', $recipients);
+        } elseif (is_string($recipients)) {
+            $this->phoneNumbers = $recipients;
         }
 
         return $this;
     }
 
     /**
-     * @param string $sender
-     * @return $this
+     * @inheritDoc
      */
-    public function from(string $sender): SmsMisr
+    public function from(string $sender): SmsMisrContract
     {
         $this->sender = $sender;
         return $this;
     }
 
     /**
-     * @param string $message
-     * @return $this
+     * @inheritDoc
      */
-    public function message(string $message): SmsMisr
+    public function message(string $message): SmsMisrContract
     {
         $this->message = $message;
         return $this;
     }
 
     /**
-     * @param Carbon $date
-     * @return $this
+     * @inheritDoc
      */
-    public function delay(Carbon $date): SmsMisr
+    public function delay(Carbon $date): SmsMisrContract
     {
         $this->delayDate = $date->format('Y-m-d-H-i');
         return $this;
     }
 
     /**
-     * @param string $lang
-     * @return $this
+     * @inheritDoc
      */
-    public function language(string $lang): SmsMisr
+    public function language(string $lang): SmsMisrContract
     {
         if (is_null($language = Arr::get(self::ALLOWED_LANGUAGES, $lang)))
             throw new \InvalidArgumentException("Unsupported language is set");
@@ -110,10 +105,11 @@ class SmsMisr
     /**
      * prepares the request before sending
      * @return void
+     * @throws \Exception
      */
-    protected function prepareRequest(): void
+    protected function validateRequest(): void
     {
-        if (! isset($this->language))
+        if (!isset($this->language))
             throw new \InvalidArgumentException("Language is not set");
 
         if (!isset($this->message))
@@ -121,21 +117,15 @@ class SmsMisr
 
         if (empty($this->phoneNumbers))
             throw new \InvalidArgumentException("Phone number is not set");
-
-        $this->request['language'] = $this->language;
-        $this->request['message'] = $this->message;
-        $this->request['mobile'] = implode(',', $this->phoneNumbers);
-
-        is_null($this->delayDate) ?: $this->request['DelayUntil'] = $this->delayDate;
     }
 
     /**
-     * Validates package configuration variables
+     * Validates and sets package configuration variables
      *
-     * @param $config
+     * @param array $config
      * @throws \Exception
      */
-    protected function validate($config): void
+    protected function validateConfiguration(array $config): void
     {
         if (!isset($config['sender']))
             throw new \Exception("SMSMISR_API_SENDER is not set");
@@ -145,16 +135,31 @@ class SmsMisr
 
         if (!isset($config['password']))
             throw new \Exception("SMSMISR_API_PASSWORD is not set");
+
+        $this->sender = config('sms-misr.sender');
+        $this->username = config('sms-misr.username');
+        $this->password = config('sms-misr.password');
     }
 
     /**
-     * @return object
+     * @inheritDoc
      */
     public function send(): object
     {
-        $this->prepareRequest();
+        $this->validateRequest();
 
-        return $this->httpClient->post('', $this->request)->object();
+        $request = [
+            'username' => $this->username,
+            'password' => $this->password,
+            'sender' => $this->sender,
+            'language' => $this->language,
+            'message' => $this->message,
+            'mobile' => $this->phoneNumbers
+        ];
+
+        !isset($this->delayDate) ?: $request['DelayUntil'] = $this->delayDate;
+
+        return $this->httpClient->post('', $request)->object();
     }
 
 }

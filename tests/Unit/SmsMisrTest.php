@@ -2,7 +2,6 @@
 
 namespace Caishni\SmsMisr\Tests\Unit;
 
-use Caishni\SmsMisr\Facades\SmsMisr;
 use Caishni\SmsMisr\Tests\TestCase;
 
 class SmsMisrTest extends TestCase
@@ -10,7 +9,7 @@ class SmsMisrTest extends TestCase
     /** @test */
     public function it_can_send_to_one_target()
     {
-        $response = SmsMisr::to('201234567891')
+        $response = sms()->to('201234567891')
             ->message('hello world')
             ->language('en')
             ->send();
@@ -23,7 +22,7 @@ class SmsMisrTest extends TestCase
     {
         sleep(2);
 
-        $response = SmsMisr::to(['201234567891', '201234567892', '201234567893'])
+        $response = sms()->to(['201234567891', '201234567892', '201234567893'])
             ->message('hello world')
             ->language('en')
             ->send();
@@ -36,7 +35,7 @@ class SmsMisrTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        SmsMisr::to('201234567891')
+        sms()->to('201234567891')
             ->language('en')
             ->send();
     }
@@ -46,7 +45,7 @@ class SmsMisrTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        SmsMisr::to('201234567891')
+        sms()->to('201234567891')
             ->message('hello world')
             ->send();
     }
@@ -56,7 +55,7 @@ class SmsMisrTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        SmsMisr::to('201234567891')
+        sms()->to('201234567891')
             ->language('es')
             ->send();
     }
@@ -70,6 +69,6 @@ class SmsMisrTest extends TestCase
         $this->app['config']->set('sms-misr.password', null);
         $this->app['config']->set('sms-misr.sender', null);
 
-        SmsMisr::message('test');
+        sms()->message('test');
     }
 }

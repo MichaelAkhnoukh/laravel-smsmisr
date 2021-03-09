@@ -21,16 +21,16 @@
   "autoload-dev": {
     "psr-4": {
       "Caishni\\SmsMisr\\Tests\\": "tests"
-    }
+    },
+    "files": [
+      "src/helpers.php"
+    ]
   },
   "extra": {
     "laravel": {
       "providers": [
         "Caishni\\SmsMisr\\SmsMisrServiceProvider"
-      ],
-      "aliases": {
-        "SmsMisr": "Caishni\\SmsMisr\\Facades\\SmsMisr"
-      }
+      ]
     }
   },
   "require": {
