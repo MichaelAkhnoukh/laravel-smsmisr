@@ -16,15 +16,15 @@
   "autoload": {
     "psr-4": {
       "Caishni\\SmsMisr\\": "src"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Caishni\\SmsMisr\\Tests\\": "tests"
     },
     "files": [
       "src/helpers.php"
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Caishni\\SmsMisr\\Tests\\": "tests"
+    }
   },
   "extra": {
     "laravel": {
