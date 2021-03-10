@@ -1,10 +1,10 @@
 <?php
 
-use Caishni\SmsMisr\Contracts\SmsMisr as SmsMisrContract;
+use Caishni\SmsMisr\SmsMisr;
 
 if (!function_exists('sms')) {
-    function sms(): SmsMisrContract
+    function sms(): SmsMisr
     {
-        return app(SmsMisrContract::class);
+        return app(SmsMisr::class);
     }
 }
