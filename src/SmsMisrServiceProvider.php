@@ -2,11 +2,10 @@
 
 namespace Caishni\SmsMisr;
 
-use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 use Caishni\SmsMisr\Contracts\SmsMisr as SmsMisrContract;
 
-class SmsMisrServiceProvider extends ServiceProvider implements DeferrableProvider
+class SmsMisrServiceProvider extends ServiceProvider
 {
     public function boot()
     {
